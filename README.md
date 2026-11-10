@@ -1,4 +1,4 @@
-# SupportMind AI
+# 🤖 SupportMind AI
 ### Intelligent Multi-Agent Customer Support | Shared Memory | Human-in-the-Loop Review
 
 <p align="center">
@@ -278,17 +278,52 @@ Watch the complete demonstration:
 
 **[SupportMind AI – Project Demo](https://youtu.be/R-caZrOiK9U)**
 
-## Author
+---
+
+## 👨‍💻 Author
 
 **Arish Islam**
 
-Student Developer | Web Development | AI & Multi-Agent Systems
+*Student Developer | Web Development | AI & Multi-Agent Systems*
 
-- GitHub: [@arish096](https://github.com/arish096)
-- Project: [SupportMind AI](https://github.com/arish096/SupportMind-AI)
+<p align="left">
+  <a href="https://github.com/arish096">
+    <img src="https://img.shields.io/badge/GitHub-arish096-181717?style=for-the-badge&logo=github" />
+  </a>
+  <a href="https://leetcode.com/u/Arish_Islam/">
+    <img src="https://img.shields.io/badge/LeetCode-Profile-FFA116?style=for-the-badge&logo=leetcode&logoColor=white" />
+  </a>
+  <a href="https://hackerearth.com/@arishislam096/">
+    <img src="https://img.shields.io/badge/HackerEarth-Profile-2C3454?style=for-the-badge&logo=hackerearth" />
+  </a>
+  <a href="mailto:arishislam096@gmail.com">
+    <img src="https://img.shields.io/badge/Email-Contact%20Me-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
+  </a>
+</p>
+
+**Project:** [SupportMind AI](https://github.com/arish096/SupportMind-AI)
+
+---
+
+## ⭐ Support
+
+If you find this project interesting or useful, consider giving the repository a ⭐ on GitHub.
+
+<p align="left">
+  <a href="https://github.com/arish096/SupportMind-AI">
+    <img src="https://img.shields.io/github/stars/arish096/SupportMind-AI?style=social" />
+  </a>
+  <a href="https://github.com/arish096/SupportMind-AI/fork">
+    <img src="https://img.shields.io/github/forks/arish096/SupportMind-AI?style=social" />
+  </a>
+</p>
 
 ---
 
 <p align="center">
-  Built with curiosity, experimentation, and a focus on practical AI engineering.
+  <i>Building practical AI solutions through experimentation, creativity, and continuous learning.</i>
+</p>
+
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=arish096&label=Profile%20Views&color=6366f1&style=flat-square" />
 </p>
