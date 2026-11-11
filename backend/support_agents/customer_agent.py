@@ -1,54 +1,33 @@
-
-from google.adk.agents import Agent
+﻿from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
 
 customer_agent = Agent(
     name="customer_agent",
-
-    model=LiteLlm(
-        model="openrouter/openrouter/free"
-    ),
-
-    description=(
-        "Analyzes customer queries and identifies "
-        "their support requirements."
-    ),
-
+    model=LiteLlm(model="openrouter/openrouter/free"),
+    description="Understands customer problems, classifies support requests, and identifies missing information.",
     instruction="""
-    You are the Customer Understanding Agent
-    of SupportMind AI.
+You are the Customer Understanding Agent of SupportMind AI.
 
-    Your responsibilities:
+Analyze the customer's message and return:
+1. Category: Technical Issue, Account Issue, Billing Issue, Product Information, or General Support.
+2. Urgency: Low, Medium, or High.
+3. Summary: A short, factual summary.
+4. Missing Information: Only details needed to investigate the issue.
+5. Recommended Next Step: Safe, practical guidance.
 
-    1. Understand the customer's problem.
-    2. Identify the main issue.
-    3. Classify the query into:
-       - Technical Issue
-       - Account Issue
-       - Billing Issue
-       - Product Information
-       - General Support
+For account access issues, consider asking for:
+- Exact error message or error code.
+- Device and operating system.
+- Browser or app being used.
+- Whether another browser or device was tried.
+- Whether cache and cookies were cleared.
+- Whether password reset was attempted.
 
-    4. Identify urgency:
-       - Low
-       - Medium
-       - High
+For billing issues, identify missing order ID, transaction/reference ID, amount, and transaction date/time.
 
-    5. Generate a short issue summary.
-    6. Identify missing information.
-
-    Return your response in this format:
-
-    Category:
-    Urgency:
-    Summary:
-    Missing Information:
-    Recommended Next Step:
-
-    Never invent customer information.
-    Be professional, clear and helpful.
-    """,
-
+Never ask for passwords, OTPs, PINs, recovery codes, full card numbers, or API keys.
+Never invent account status, causes, policies, or resolution timelines.
+Keep the response concise and professional.
+""",
     output_key="customer_analysis"
 )
-

@@ -253,3 +253,88 @@ def get_performance_metrics():
 
 
 initialize_database()
+
+def ensure_meko_sync_table():
+    with get_connection() as connection:
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS meko_syncs (
+                ticket_id INTEGER PRIMARY KEY,
+                document_key TEXT,
+                status TEXT NOT NULL DEFAULT 'pending',
+                error TEXT,
+                updated_at TEXT NOT NULL
+            )
+        """)
+
+
+def get_approved_ticket(ticket_id):
+    initialize_database()
+    with get_connection() as connection:
+        row = connection.execute("""
+            SELECT id, issue, resolution
+            FROM support_tickets
+            WHERE id = ? AND status = 'approved'
+        """, (ticket_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def claim_meko_sync(ticket_id):
+    initialize_database()
+    ensure_meko_sync_table()
+    now = datetime.now(timezone.utc).isoformat()
+
+    with get_connection() as connection:
+        row = connection.execute(
+            "SELECT status FROM meko_syncs WHERE ticket_id = ?",
+            (ticket_id,)
+        ).fetchone()
+
+        if row:
+            if row["status"] != "failed":
+                return False
+            connection.execute("""
+                UPDATE meko_syncs
+                SET status = 'pending', error = NULL, updated_at = ?
+                WHERE ticket_id = ? AND status = 'failed'
+            """, (now, ticket_id))
+            return True
+
+        connection.execute("""
+            INSERT INTO meko_syncs (ticket_id, status, updated_at)
+            VALUES (?, 'pending', ?)
+        """, (ticket_id, now))
+    return True
+
+
+def update_meko_sync(ticket_id, status, document_key=None, error=None):
+    initialize_database()
+    ensure_meko_sync_table()
+
+    with get_connection() as connection:
+        connection.execute("""
+            INSERT INTO meko_syncs
+            (ticket_id, document_key, status, error, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(ticket_id) DO UPDATE SET
+                document_key = excluded.document_key,
+                status = excluded.status,
+                error = excluded.error,
+                updated_at = excluded.updated_at
+        """, (
+            ticket_id, document_key, status,
+            error[:1000] if error else None,
+            datetime.now(timezone.utc).isoformat()
+        ))
+
+
+def get_meko_sync_status(ticket_id):
+    initialize_database()
+    ensure_meko_sync_table()
+
+    with get_connection() as connection:
+        row = connection.execute("""
+            SELECT ticket_id, document_key, status, error, updated_at
+            FROM meko_syncs WHERE ticket_id = ?
+        """, (ticket_id,)).fetchone()
+    return dict(row) if row else None
+

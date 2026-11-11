@@ -1,5 +1,6 @@
 
 import time
+from contextlib import asynccontextmanager
 from uuid import uuid4
 from pathlib import Path
 
@@ -15,11 +16,15 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from support_agents import root_agent
+from support_agents.meko_publisher import publish_approved_ticket
+from support_agents.meko_toolset import meko_toolset
 from support_agents.memory_store import (
     create_support_ticket,
     get_support_tickets,
     review_support_ticket,
     get_performance_metrics,
+    get_meko_sync_status,
+    get_approved_ticket,
 )
 
 
@@ -45,10 +50,19 @@ def clean_review_response(response: str) -> str:
     )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        yield
+    finally:
+        await meko_toolset.close()
+
+
 app = FastAPI(
     title="SupportMind AI",
     description="Multi-Agent Customer Support System",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -172,16 +186,65 @@ async def tickets():
 
 @app.post("/tickets/{ticket_id}/review")
 async def review_ticket(ticket_id: int, request: ReviewRequest):
-    result = review_support_ticket(
+    success, review_status = review_support_ticket(
         ticket_id,
         request.approved,
         request.reviewer,
     )
 
+    if not success:
+        error_code = 404 if review_status == "Ticket not found." else 409
+        raise HTTPException(status_code=error_code, detail=review_status)
+
+    meko_result = None
+
+    if request.approved:
+        meko_result = await publish_approved_ticket(ticket_id)
+
     return {
         "status": "success",
         "ticket_id": ticket_id,
-        "review_result": result,
+        "review_status": review_status,
+        "meko_sync": meko_result,
+        "meko_sync_record": get_meko_sync_status(ticket_id),
+    }
+
+
+@app.post("/tickets/{ticket_id}/meko/retry")
+async def retry_meko_sync(ticket_id: int):
+    ticket = get_approved_ticket(ticket_id)
+
+    if not ticket:
+        raise HTTPException(
+            status_code=404,
+            detail="Only approved tickets can be synced."
+        )
+
+    result = await publish_approved_ticket(ticket_id)
+
+    return {
+        "status": "success",
+        "ticket_id": ticket_id,
+        "meko_sync": result,
+        "meko_sync_record": get_meko_sync_status(ticket_id),
+    }
+
+
+@app.get("/tickets/{ticket_id}/meko/status")
+async def meko_sync_status(ticket_id: int):
+    ticket = get_approved_ticket(ticket_id)
+
+    if not ticket:
+        raise HTTPException(
+            status_code=404,
+            detail="Approved ticket not found."
+        )
+
+    record = get_meko_sync_status(ticket_id)
+
+    return {
+        "ticket_id": ticket_id,
+        "meko_sync": record or {"status": "not_started"},
     }
 
 
